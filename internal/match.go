@@ -8,11 +8,13 @@ import (
 	"strings"
 )
 
+// Match represents a regexp pattern for matching the uri and, if matched, expands that match into a full URL using a given template.
 type Match struct {
 	URIPattern  *regexp.Regexp `json:"uri_pattern"`
 	URLTemplate string         `json:"url_template"`
 }
 
+// ExpandURL expands the given uri into a full URL if the uri matches the pattern. If the uri does not match the pattern, the function returns false.
 func (m *Match) ExpandURL(uri string) (string, bool) {
 	p := m.URIPattern
 	if idx := p.FindStringSubmatchIndex(uri); idx != nil {

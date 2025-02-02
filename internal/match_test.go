@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"regexp"
 	"testing"
 )
@@ -17,7 +18,7 @@ func errorsAreSame(a, b error) bool {
 	return a.Error() == b.Error()
 }
 
-func TestExpand(t *testing.T) {
+func TestExpandURL(t *testing.T) {
 	tests := []struct {
 		Match       Match
 		URI         string
@@ -96,22 +97,25 @@ func TestExpand(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		url, ok := test.Match.ExpandURL(test.URI)
-		if url != test.ExpectedURL || ok != test.ExpectedOK {
-			t.Fatalf(
-				"match = %#v, uri = %#v, got (%#v, %t) expected (%#v, %t)",
-				test.Match,
-				test.URI,
-				url,
-				ok,
-				test.ExpectedURL,
-				test.ExpectedOK)
-		}
+	for i, test := range tests {
+		t.Run(
+			fmt.Sprintf("Test-%d", i),
+			func(t *testing.T) {
+				url, ok := test.Match.ExpandURL(test.URI)
+				if url != test.ExpectedURL || ok != test.ExpectedOK {
+					t.Fatalf(
+						"match = %#v, uri = %#v, got (%#v, %t) expected (%#v, %t)",
+						test.Match,
+						test.URI,
+						url,
+						ok,
+						test.ExpectedURL,
+						test.ExpectedOK)
+				}
+			})
 	}
 }
 
-// TODO(kelly): Add tests for Match.UnmarshalJSON
 func TestMatchUnmarshalJSON(t *testing.T) {
 	tests := []struct {
 		JSON          string
@@ -151,15 +155,17 @@ func TestMatchUnmarshalJSON(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		var m Match
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("Test-%d", i), func(t *testing.T) {
+			var m Match
 
-		err := json.Unmarshal([]byte(test.JSON), &m)
-		if !errorsAreSame(err, test.ExpectedError) {
-			t.Fatalf("got error %v, expected %v", err, test.ExpectedError)
-		}
-		if test.ExpectedMatch != nil && !MatchesAreSame(&m, test.ExpectedMatch) {
-			t.Fatalf("got %#v, expected %#v", m, test.ExpectedMatch)
-		}
+			err := json.Unmarshal([]byte(test.JSON), &m)
+			if !errorsAreSame(err, test.ExpectedError) {
+				t.Fatalf("got error %v, expected %v", err, test.ExpectedError)
+			}
+			if test.ExpectedMatch != nil && !MatchesAreSame(&m, test.ExpectedMatch) {
+				t.Fatalf("got %#v, expected %#v", m, test.ExpectedMatch)
+			}
+		})
 	}
 }
