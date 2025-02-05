@@ -9,29 +9,6 @@ import (
 	"time"
 )
 
-func linksAreSame(a, b *Link) bool {
-	if a == b {
-		return true
-	} else if a == nil || b == nil {
-		return false
-	}
-	return a.Name == b.Name &&
-		allMatchesAreSame(a.Matches, b.Matches) &&
-		a.Time.Equal(b.Time)
-}
-
-func allMatchesAreSame(a, b []*Match) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if !MatchesAreSame(a[i], b[i]) {
-			return false
-		}
-	}
-	return true
-}
-
 func TestLinkUnmarshalJSON(t *testing.T) {
 	tests := []struct {
 		JSON          string
@@ -91,7 +68,7 @@ func TestLinkUnmarshalJSON(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.JSON), &l); !errorsAreSame(err, test.ExpectedError) {
 				t.Errorf("unexpected error: %v", err)
 			}
-			if test.ExpectedLink != nil && !linksAreSame(&l, test.ExpectedLink) {
+			if test.ExpectedLink != nil && !LinksAreSame(&l, test.ExpectedLink) {
 				t.Fatalf("for %s got %v expected %v", test.JSON, l, test.ExpectedLink)
 			}
 		})

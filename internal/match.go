@@ -23,6 +23,13 @@ func (m *Match) ExpandURL(uri string) (string, bool) {
 	return "", false
 }
 
+func (m *Match) Clone() *Match {
+	return &Match{
+		URIPattern:  m.URIPattern.Copy(),
+		URLTemplate: m.URLTemplate,
+	}
+}
+
 func (m *Match) UnmarshalJSON(data []byte) error {
 	var t struct {
 		URIPattern  *regexp.Regexp `json:"uri_pattern"`

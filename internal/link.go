@@ -56,3 +56,39 @@ func (l *Link) Expand(uri string) *ExpandedURL {
 	}
 	return nil
 }
+
+func (l *Link) Clone() *Link {
+	matches := make([]*Match, len(l.Matches))
+	for i, m := range l.Matches {
+		matches[i] = m.Clone()
+	}
+
+	return &Link{
+		Name:    l.Name,
+		Matches: matches,
+		Time:    l.Time,
+	}
+}
+
+func LinksAreSame(a, b *Link) bool {
+	if a == b {
+		return true
+	} else if a == nil || b == nil {
+		return false
+	}
+	return a.Name == b.Name &&
+		allMatchesAreSame(a.Matches, b.Matches) &&
+		a.Time.Equal(b.Time)
+}
+
+func allMatchesAreSame(a, b []*Match) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if !MatchesAreSame(a[i], b[i]) {
+			return false
+		}
+	}
+	return true
+}

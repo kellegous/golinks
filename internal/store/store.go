@@ -2,10 +2,13 @@ package store
 
 import (
 	"context"
+	"errors"
 	"iter"
 
 	"github.com/kellegous/golinks/internal"
 )
+
+var ErrNotFound = errors.New("not found")
 
 type Store interface {
 	Close(ctx context.Context) error
