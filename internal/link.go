@@ -44,7 +44,10 @@ func (l *Link) Expand(uri string) *ExpandedURL {
 		return nil
 	}
 
+	// remove the name prefix
 	s := strings.TrimLeft(uri[len(l.Name):], "/")
+
+	// find the first match that can expand the uri
 	for i, match := range l.Matches {
 		if expanded, ok := match.ExpandURL(s); ok {
 			return &ExpandedURL{

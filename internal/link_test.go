@@ -75,5 +75,100 @@ func TestLinkUnmarshalJSON(t *testing.T) {
 	}
 }
 
+func expandedURLsAreSame(a, b *ExpandedURL) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return a.URL == b.URL && a.Index == b.Index && LinksAreSame(a.Link, b.Link)
+}
+
 func TestExpand(t *testing.T) {
+	linkA := Link{
+		Name: "a",
+		Matches: []*Match{
+			{
+				URIPattern:  regexp.MustCompile("^(.*)$"),
+				URLTemplate: "https://a.com/$1",
+			},
+		},
+	}
+
+	linkB := Link{
+		Name: "b",
+		Matches: []*Match{
+			{
+				URIPattern:  regexp.MustCompile("(^foo$)"),
+				URLTemplate: "https://b.com/$1",
+			},
+			{
+				URIPattern:  regexp.MustCompile("(^bar$)"),
+				URLTemplate: "https://b.com/$1",
+			},
+		},
+	}
+
+	tests := []struct {
+		Link     *Link
+		URI      string
+		Expected *ExpandedURL
+	}{
+		{
+			&linkA,
+			"a",
+			&ExpandedURL{
+				URL:   "https://a.com/",
+				Index: 0,
+				Link:  &linkA,
+			},
+		},
+		{
+			&linkA,
+			"a/",
+			&ExpandedURL{
+				URL:   "https://a.com/",
+				Index: 0,
+				Link:  &linkA,
+			},
+		},
+		{
+			&linkA,
+			"a/b/c/d/",
+			&ExpandedURL{
+				URL:   "https://a.com/b/c/d/",
+				Index: 0,
+				Link:  &linkA,
+			},
+		},
+		{
+			&linkB,
+			"b/baz",
+			nil,
+		},
+		{
+			&linkB,
+			"b/foo",
+			&ExpandedURL{
+				URL:   "https://b.com/foo",
+				Index: 0,
+				Link:  &linkB,
+			},
+		},
+		{
+			&linkB,
+			"b/bar",
+			&ExpandedURL{
+				URL:   "https://b.com/bar",
+				Index: 1,
+				Link:  &linkB,
+			},
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("Test-%d", i), func(t *testing.T) {
+			if got := test.Link.Expand(test.URI); !expandedURLsAreSame(got, test.Expected) {
+				t.Fatalf("got %v expected %v", got, test.Expected)
+			}
+		})
+	}
 }
