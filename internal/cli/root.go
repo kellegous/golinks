@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -13,12 +12,14 @@ func cmdRoot() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 		},
 	}
+
+	cmd.AddCommand(cmdServe())
+
 	return cmd
 }
 
 func Execute() {
 	if err := cmdRoot().Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

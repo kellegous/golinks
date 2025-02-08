@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"fmt"
 	"iter"
 	"sync"
 
@@ -58,7 +59,7 @@ func (s *Store) Delete(
 
 func (s *Store) List(
 	ctx context.Context,
-	opts interface{},
+	opts *store.ListOptions,
 ) iter.Seq2[*internal.Link, error] {
 	return func(yield func(*internal.Link, error) bool) {
 		s.lck.RLock()
@@ -68,4 +69,11 @@ func (s *Store) List(
 			return yield(v, nil)
 		})
 	}
+}
+
+func FromDSN(dsn string) (store.Store, error) {
+	if dsn != "" {
+		return nil, fmt.Errorf("memory store does not support any DSN options")
+	}
+	return &Store{}, nil
 }
